@@ -1,0 +1,206 @@
+
+	<!DOCTYPE html>
+<html>
+  <head>
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <style>
+      body {
+        background-color: linen;
+      }
+
+      h1 {
+        color: maroon;
+        margin-left: 40px;
+      }
+      .container{
+         margin-top: 20px;
+        
+      }
+     
+      .col-sm-2{
+       
+        border: 1px solid blue;
+        width: 200px;
+        height: 800px;
+        font-size: 12px;
+        /*padding: 50px;*/
+      }
+      .col-sm-auto{
+       
+        border: 1px solid blue;
+        width: 45%;
+        height: 800px;
+        font-size: 12px;
+        /*padding: 50px;*/
+      }
+      .col-sm-3{
+        
+        border: 1px solid blue;
+        width: 300px;
+        height: 800px;
+        font-size: 12px;
+        /*padding: 50px;*/
+      }
+      .form-control{
+        max-width: 150px;
+        max-height: 32px;
+        font-size: 12px;
+      }
+      .table-style {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      .table-style td, .table-style th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+
+      .table-style tr:nth-child(even){background-color: #f2f2f2;}
+
+      .table-style tr:hover {background-color: #ddd;}
+
+      .table-style th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div id="showTable"></div>
+            
+          </div>
+       
+      </div>
+    </div>
+
+  </body>
+</html>
+
+<script type="text/javascript">
+
+$(function() {
+   getData();
+});
+
+function getData(){
+
+  fetch('https://api.publicapis.org/categories')
+  .then(response => response.json())
+  .then(data => showData(data));
+}
+
+function showData(data){
+
+        var table_th = ['Categories'];
+
+           table = '';
+           table += '<table id="display_data" class="table table-style">';
+           table += '<thead>';
+           table += '<tr>';
+            $.each(table_th,function(key){
+                table += '<th style="vertical-align: middle; font-size: 15px; color: #fff !important;">'+table_th[key]+'</th>';
+            });
+            table += '</tr>';
+            table += '</thead>';
+            
+            table += '<tbody>';
+
+
+            $.each(data,function(key,value){
+              table += '<tr>';
+              table += '<td>'+data[key]+'</td>';
+              table += '</tr>';
+
+            });
+
+            table += '</tbody>';
+            table += ' <tfoot>';
+            table += '<tr>';
+             $.each(table_th,function(key){
+               if(table_th[key] == '' || table_th[key] == 'undefined' || table_th[key] == 'null'){
+                     table += '<th></th>';
+                
+                }else{
+
+                table += '<th><input type="text" size="1" class="form-control input-sm" placeholder="Search"></th>';
+                }
+            });
+            table += '</tr>';
+            table += '</tfoot>';
+            table += '</table>'
+
+        $('#showTable').html(table);
+
+        var arr = new Array();
+        $.each(data,function(key,value){
+          var obj = new Object();
+
+            obj['categories'] = data[key];               
+            arr.push(obj);
+
+        });
+
+        listData(arr);
+
+      }
+
+  function listData(data){
+  
+
+  try{
+        var varible_datatable = null;
+        if ($.fn.DataTable.isDataTable('#display_data')) {
+            varible_datatable = $('#display_data').DataTable();
+            varible_datatable.destroy();
+        }
+        
+        varible_datatable =  $('#display_data').DataTable({
+            "autoWidth": true,
+            "data": data,
+            "responsive": true,
+            "columnDefs": [
+                            { "className": "text_left", "targets": [ 0 ] }
+                          ],
+            "columns": [
+
+                         { "data": "categories","className": "dt-body-justify"},
+                     
+                 
+            ]
+        });
+      
+        varible_datatable.columns().every(function() {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function() {
+                if (that.search() !== this.value) {
+                     that
+                         .search(this.value)
+                         .draw();
+                 }
+          }).css('width', '100%');
+        });
+       // $('#SW0127_importTransactions_filter').addClass('hidden');
+    }catch(e){
+       // console.log(e);
+        //$('#display_data').DataTable().clear().draw();
+    }
+
+
+}
+
+</script>
